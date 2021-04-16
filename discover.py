@@ -1022,7 +1022,7 @@ import os
 import pandas as pd
 from math import ceil
 logger('  send download request to get last taskId','n')
-header = {'Authorization':'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjbGllbnRJRCI6IjAzMTdiMWUzYWQwMDAxM2FkZDc4YzhiOCJ9.3rqNUm3_lTmkwHdwfpDIPKY0dG91Hvr3-bcBw09anH4','Content-Type':'application/json'}
+header = {'Authorization':'','Content-Type':'application/json'}
 r = requests.get('https://extapigwservice-demo.cidemo.sas.com/marketingDesign/tasks/',headers=header)
 r = json.loads(r.text)
 last = int(re.findall('start=[\\d]+',r['links'][2]['href'])[0][-3:])
