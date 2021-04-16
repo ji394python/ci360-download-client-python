@@ -1096,3 +1096,36 @@ for email in emailType:
 
 # df = pd.DataFrame({'taskId':taskIdDict.keys(),'taskName':taskIdDict.values()},index=[i+1 for i in range(len(taskIdDict.keys()))])
 # df.to_csv('taskId.csv',encoding='utf-8')
+
+##################
+
+#Site: SAS Taiwan
+#Author: Rita Tang
+#Description: Mapping customized id for identity_id
+
+if martName == 'snapshot':
+
+    logger('Identity Processing - start','n')
+
+    emailType = set(pd.Series(os.listdir('dscwh')).apply(lambda x:x[x.find('EMAIL'):x.find('.csv')] if x.find('EMAIL') != -1 else 0 ).values.tolist())
+    outputCsv = os.listdir('dscwh')
+
+    for email in emailType:
+        logger(f'********** Mapping of identity Table **********','n')
+        if email ==0 : continue
+        globals()[email] = pd.DataFrame()
+        for file in outputCsv:
+            if file.find(email) != -1:
+                identity_attr = pd.read_csv(r'dscwh\IDENTITY_ATTRIBUTES.csv', engine='c')
+                becount = pd.read_csv('dscwh\\'+file)
+                try:
+                    mappingID = identity_attr.loc[identity_attr['identity_id'].isin(becount['identity_id']),['identity_id','user_identifier_val']].reset_index(drop=True)
+                    get_task_id = pd.merge(mappingID, becount[['identity_id','task_id']], on='identity_id', how='left')
+                except:
+                    continue
+                globals()[email] = get_task_id
+                globals()[email].insert(loc=3,column='task_name',value=[ taskIdHash[i] if i in list(taskIdHash.keys()) else "" for i in eval(email)['task_id'].values])
+                logger('       dataMergeProcessingStatus : dscwh\\'+file +f'--{len(get_task_id)} rows','n')
+        logger(f"       dataMergeProcessingStatus : Output merge table {email}.csv",'n')
+        globals()[email].to_csv(email+'_Identity.csv',encoding='utf-8',index=False)
+
